@@ -580,8 +580,8 @@ class Publisher:
         all_tests, skipped_tests = restrict_unicode_list(all_tests), restrict_unicode_list(skipped_tests)
         test_changes = SomeTestChanges(before_all_tests, all_tests, before_skipped_tests, skipped_tests)
 
-        latest_comment = self.get_latest_comment(pull_request)
-        latest_comment_body = latest_comment.body if latest_comment else None
+        latest_comment = None
+        latest_comment_body = None
 
         # are we required to create a comment on this PR?
         earlier_stats = self.get_stats_from_summary_md(latest_comment_body) if latest_comment_body else None
