@@ -15,6 +15,10 @@ inputs:
     description: 'Requests to the GitHub API are retried this number of times. The value must be a positive integer or zero.'
     default: '10'
     required: false
+  ssl_verify:
+    description: 'Either "true" or "false", in which case it controls whether to verify the Github server’s TLS certificate, or a string, in which case it must be a path to a CA bundle to use. Default is "true".'
+    default: true
+    required: false
   commit:
     description: 'Commit SHA to which test results are published. Only needed if the value of GITHUB_SHA does not work for you.'
     required: false
@@ -177,11 +181,12 @@ runs:
         echo "PYTHON_BIN=$PYTHON_BIN" >> "$GITHUB_ENV"
 
         PYTHON_VERSION="$($PYTHON_BIN -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')"
-        if [[ "$PYTHON_VERSION" == "3.7" ]]
-        then
+        if [[ "$PYTHON_VERSION" == "3.7" ]]; then
           echo "DEPENDENCIES_VERSION=3.7" >> "$GITHUB_ENV"
+        elif [[ "$PYTHON_VERSION" == "3.8" ]]; then
+          echo "DEPENDENCIES_VERSION=3.8" >> "$GITHUB_ENV"
         else
-          echo "DEPENDENCIES_VERSION=post-3.7" >> "$GITHUB_ENV"
+          echo "DEPENDENCIES_VERSION=post-3.8" >> "$GITHUB_ENV"
         fi
         echo "version=$PYTHON_VERSION" >> "$GITHUB_OUTPUT"
 
@@ -194,7 +199,7 @@ runs:
       continue-on-error: true
       with:
         path: '~/Library/Caches/pip'
-        key: enricomi-publish-action-${{ runner.os }}-${{ runner.arch }}-pip-${{ steps.python.outputs.version }}-e594996205319a7990b3a4ec677d10a3
+        key: enricomi-publish-action-${{ runner.os }}-${{ runner.arch }}-pip-${{ steps.python.outputs.version }}-b0048519e3287ae9cfc634aeda40cbfe
 
     - name: Create virtualenv
       id: venv
@@ -250,6 +255,7 @@ runs:
         GITHUB_TOKEN: ${{ inputs.github_token }}
         GITHUB_TOKEN_ACTOR: ${{ inputs.github_token_actor }}
         GITHUB_RETRIES: ${{ inputs.github_retries }}
+        SSL_VERIFY: ${{ inputs.ssl_verify }}
         COMMIT: ${{ inputs.commit }}
         CHECK_NAME: ${{ inputs.check_name }}
         COMMENT_TITLE: ${{ inputs.comment_title }}
